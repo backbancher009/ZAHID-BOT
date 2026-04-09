@@ -1,26 +1,34 @@
 module.exports = function () {
-  return `${global.config.botName} CONNECTED«
+  return `
+🤖 ${global.config.botName} • 𝗩𝗜𝗣 𝗦𝗬𝗦𝗧𝗘𝗠 𝗢𝗡𝗟𝗜𝗡𝗘
 
-Assalamualaykum☘️
-<------------------------------>
-BOT CONNECTED SUCCESSFUL !!!
+𝑨𝒔𝒔𝒂𝒍𝒂𝒎𝒖𝒂𝒍𝒂𝒊𝒌𝒖𝒎 🌙
 
-APPROVAL ALLOW IN THIS GROUP!!!
-<------------------------------>
+𝗧𝗵𝗶𝘀 𝗴𝗿𝗼𝘂𝗽 𝗵𝗮𝘀 𝗯𝗲𝗲𝗻 𝘀𝘂𝗰𝗰𝗲𝘀𝘀𝗳𝘂𝗹𝗹𝘆 𝗰𝗼𝗻𝗻𝗲𝗰𝘁𝗲𝗱 𝘁𝗼 𝗮 𝗽𝗿𝗲𝗺𝗶𝘂𝗺 𝗮𝘂𝘁𝗼𝗺𝗮𝘁𝗶𝗼𝗻 𝘀𝘆𝘀𝘁𝗲𝗺.
+𝗔𝗹𝗹 𝗮𝗱𝘃𝗮𝗻𝗰𝗲𝗱 𝗳𝗲𝗮𝘁𝘂𝗿𝗲𝘀 𝗮𝗿𝗲 𝗻𝗼𝘄 𝗮𝗰𝘁𝗶𝘃𝗲 𝗮𝗻𝗱 𝗿𝗲𝗮𝗱𝘆 𝘁𝗼 𝘂𝘀𝗲.
 
-TO VIEW ANY COMMAND Use👉 ${global.config.PREFIX}help
-See command👉 ${global.config.PREFIX}menu
+━━━━━━━━━━━━━━━━━━━━━━━
 
-EXAMPLE:👇
-${global.config.PREFIX}admin (information)
-${global.config.PREFIX}info (admin info)
-${global.config.PREFIX}alldown (link)
+⚡ 𝗖𝗼𝗺𝗺𝗮𝗻𝗱 𝗔𝗰𝗰𝗲𝘀𝘀
+• 𝗠𝗲𝗻𝘂: ${global.config.PREFIX}𝗺𝗲𝗻𝘂
+• 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀: ${global.config.PREFIX}𝗵𝗲𝗹𝗽
 
-<------------------------------>
+📌 𝗤𝘂𝗶𝗰𝗸 𝗘𝘅𝗮𝗺𝗽𝗹𝗲𝘀
+• ${global.config.PREFIX}𝗮𝗱𝗺𝗶𝗻 — 𝗺𝗮𝗻𝗮𝗴𝗲 𝗴𝗿𝗼𝘂𝗽
+• ${global.config.PREFIX}𝗶𝗻𝗳𝗼 — 𝗴𝗿𝗼𝘂𝗽 𝗱𝗲𝘁𝗮𝗶𝗹𝘀
+• ${global.config.PREFIX}𝗮𝗹𝗹𝗱𝗼𝘄𝗻 — 𝗺𝗲𝗱𝗶𝗮 𝗱𝗼𝘄𝗻𝗹𝗼𝗮𝗱
 
-AND FOR ANY COMPLAINTS OR CONTACT BOT OPERATOR 
+━━━━━━━━━━━━━━━━━━━━━━━
 
-DEVELOPER: ${global.config.botOwner}
+🔐 𝗦𝘆𝘀𝘁𝗲𝗺 𝗦𝘁𝗮𝘁𝘂𝘀: 𝗦𝗲𝗰𝘂𝗿𝗲 & 𝗔𝗰𝘁𝗶𝘃𝗲 🏳️
+🚀 𝗣𝗲𝗿𝗳𝗼𝗿𝗺𝗮𝗻𝗰𝗲: 𝗢𝗽𝘁𝗶𝗺𝗶𝘇𝗲𝗱 ✅ 
 
-🔵WHATSAPP NUMBER: wa.me/+${global.config.admin[0] || "8801615298449"}`;
+𝗜𝗳 𝘆𝗼𝘂 𝗻𝗲𝗲𝗱 𝘀𝘂𝗽𝗽𝗼𝗿𝘁 𝗼𝗿 𝗮𝗰𝗰𝗲𝘀𝘀, 𝗰𝗼𝗻𝘁𝗮𝗰𝘁 𝗱𝗶𝗿𝗲𝗰𝘁𝗹𝘆:
+
+🍷Developer: ${global.config.botOwner}
+📞 Contact: wa.me/${global.config.admin[0] || "8801615298449"}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+✨ 𝗩𝗜𝗣 𝗔𝗖𝗖𝗘𝗦𝗦 𝗘𝗡𝗔𝗕𝗟𝗘𝗗 • 𝗘𝗡𝗝𝗢𝗬 𝗧𝗛𝗘 𝗘𝗫𝗣𝗘𝗥𝗜𝗘𝗡𝗖𝗘
+`;
 };
