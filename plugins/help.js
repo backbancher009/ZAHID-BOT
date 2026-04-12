@@ -2,46 +2,21 @@ const axios = require("axios");
 
 module.exports = {
   config: {
-    name: 'help',
-    aliases: ['menu'],
+    name: "menu",
+    aliases: ["help"],
     permission: 0,
     prefix: true,
-    description: 'Show all available commands.',
-    category: 'Utility',
-    credit: '𝐙𝐀𝐇𝐈𝐃-𝐁𝐎𝐓 🍷',
-    usages: ['help', 'help [command name]'],
+    description: "Premium Command Menu",
+    category: "Utility",
+    credit: "XAHID PRIME 🍷"
   },
 
-  start: async ({ event, api, args, loadcmd }) => {
-    const { threadId, getPrefix } = event;
+  start: async ({ event, api, loadcmd }) => {
+    const { threadId } = event;
 
     const commands = loadcmd.map(cmd => cmd.config);
-    const prefix = await getPrefix(threadId);
-    const globalPrefix = global.config.PREFIX;
 
-    // 🔍 SINGLE COMMAND INFO
-    if (args[0]) {
-      const cmd = commands.find(c => c.name.toLowerCase() === args[0].toLowerCase());
-
-      if (!cmd) {
-        return api.sendMessage(threadId, { text: "❌ Command not found" });
-      }
-
-      return api.sendMessage(threadId, {
-        text: `
-✨ ${cmd.name}
-
-• Aliases: ${cmd.aliases?.join(", ") || "None"}
-• Description: ${cmd.description || "No description"}
-• Usage: ${cmd.usages?.join(" , ") || "N/A"}
-• Permission: ${cmd.permission}
-• Category: ${cmd.category || "Other"}
-• Credit: ${cmd.credit || "Unknown"}
-`
-      });
-    }
-
-    // 📂 CATEGORY BUILD
+    // 🧠 Group commands by category
     const categories = {};
     commands.forEach(cmd => {
       const cat = cmd.category || cmd.categorie || cmd.categories || "Other";
@@ -49,44 +24,57 @@ module.exports = {
       categories[cat].push(cmd.name);
     });
 
-    // 🕒 TIME
-    const timezone = global.config.timeZone || "Asia/Dhaka";
+    // 🕒 Time & Date
+    const now = new Date();
+    const time = now.toLocaleTimeString("en-US", { hour12: true });
+    const date = now.toLocaleDateString("en-US");
 
-    const currentTime = new Date().toLocaleTimeString("en-US", {
-      timeZone: timezone,
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true
-    });
+    // 📊 Total commands
+    const total = commands.length;
 
-    const currentDate = new Date().toLocaleDateString("en-US", {
-      timeZone: timezone
-    });
-
-    // 🚀 HEADER
+    // 💎 Header
     let text = `
-✨ ${global.config.botName}
+╔══════════════════════╗
+   🚀 ${global.config.botName || "𝐙𝐀𝐇𝐈𝐃-𝐁𝐎𝐓 𝐒𝐘𝐒𝐓𝐄𝐌"} 🚀
+╚══════════════════════╝
 
-👑 Owner: ${global.config.botOwner}
-🌐 Prefix: ${prefix || globalPrefix}
+👑 𝐎𝐰𝐧𝐞𝐫   : ${global.config.botOwner || "𝐙𝐀𝐇𝐈𝐃-𝐁𝐎𝐓"}
+🤖 𝐁𝐨𝐭     : ${global.config.botName || "𝐙𝐀𝐇𝐈𝐃-𝐁𝐎𝐓"}
+🌐 𝐏𝐫𝐞𝐟𝐢𝐱  : ${global.config.PREFIX}
+⚡ 𝐕𝐞𝐫𝐬𝐢𝐨𝐧 : ${global.pkg?.version || "1.0.0"}
 
-🕒 ${currentTime} • ${currentDate}
-📊 Total Commands: ${commands.length}
+⏰ 𝐓𝐢𝐦𝐞    : ${time}
+📅 𝐃𝐚𝐭𝐞    : ${date}
 
+━━━━━━━━━━━━━━━━━━━━━━━
+📦 𝐓𝐎𝐓𝐀𝐋 𝐂𝐎𝐌𝐌𝐀𝐍𝐃𝐒 ➜ ${total}
+━━━━━━━━━━━━━━━━━━━━━━━
 `;
 
-    // 📜 COMMAND LIST
+    // 📂 Categories loop
     for (const cat in categories) {
-      text += `\n${cat}\n`;
-      text += categories[cat].map(cmd => `• ${prefix}${cmd}`).join("\n");
-      text += `\n`;
+      text += `\n╭─〔 ${cat} 〕\n`;
+
+      categories[cat].forEach(cmd => {
+        text += `│ ✧ ${global.config.PREFIX}${cmd}\n`;
+      });
+
+      text += `╰───────────────╯\n`;
     }
 
-    text += `\n💎 Type ${prefix}help <command> for details`;
+    // 🔻 Footer
+    text += `
+━━━━━━━━━━━━━━━━━━━━━━━
+⚡ 𝐒𝐘𝐒𝐓𝐄𝐌 𝐒𝐓𝐀𝐓𝐔𝐒: 𝐎𝐍𝐋𝐈𝐍𝐄
+💀 𝐏𝐎𝐖𝐄𝐑𝐄𝐃 𝐁𝐘 ${global.config.botName || "𝐙𝐀𝐇𝐈𝐃-𝐁𝐎𝐓"} 🍷
+━━━━━━━━━━━━━━━━━━━━━━━
+`;
 
-    // 📤 SEND
+    // 📤 Send
     try {
-      const res = await axios.get(global.config.helpPic, { responseType: 'stream' });
+      const res = await axios.get(global.config.helpPic, {
+        responseType: "stream"
+      });
 
       await api.sendMessage(threadId, {
         image: { stream: res.data },
