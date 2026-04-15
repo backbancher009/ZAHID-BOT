@@ -5,58 +5,88 @@ module.exports = {
     name: 'info',
     aliases: ['about', 'admininfo', 'serverinfo'],
     permission: 0,
-    prefix: 'both',
-    categorie: 'Utilities',
-    credit: 'Developed by Mohammad Nayan',
-    usages: [`${global.config.PREFIX}info - Show admin and server information.`],
+    prefix: true,
+    category: 'Utilities', // ✅ fixed
+    credit: 'XAHID PRIME 🍷',
+    usages: [`${global.config.PREFIX}info`],
   },
-  start: async ({ event, api, message }) => {
+
+  start: async ({ event, api }) => {
     try {
-      const uptimeSeconds = process.uptime();
-      const uptime = new Date(uptimeSeconds * 1000).toISOString().substr(11, 8);
+      const { threadId, message } = event;
 
-      const adminListText =
-        global.config.admin.length > 0
-          ? global.config.admin
-              .map((id, i) => `${i + 1}. @${id.split('@')[0]}`)
-              .join('\n')
-          : 'No admins found.';
+      // ⏱️ uptime
+      const uptime = new Date(process.uptime() * 1000)
+        .toISOString()
+        .substr(11, 8);
 
+      // 👑 admin list fix
+      const admins = global.config.admin || [];
+
+      let adminText = "❌ No admins found";
+      let mentions = [];
+
+      if (admins.length > 0) {
+        adminText = "";
+        admins.forEach((id, i) => {
+          const jid = id.includes("@") ? id : id + "@s.whatsapp.net";
+          mentions.push(jid);
+          adminText += `👑 ${i + 1}. @${jid.split("@")[0]}\n`;
+        });
+      }
+
+      // 💎 premium message
       const infoMessage = `
---------------------------------------------
-𝐍𝐚𝐦𝐞           : 𝐌𝐨𝐡𝐚𝐦𝐦𝐚𝐝 𝐍𝐚𝐲𝐚𝐧
-𝐅𝐚𝐜𝐞𝐛𝐨𝐨𝐤       : 𝐌𝐨𝐡𝐚𝐦𝐦𝐚𝐝 𝐍𝐚𝐲𝐚𝐧
-𝐑𝐞𝐥𝐢𝐠𝐢𝐨𝐧       : 𝐈𝐬𝐥𝐚𝐦
-𝐏𝐞𝐫𝐦𝐚𝐧𝐞𝐧𝐭 𝐀𝐝𝐝𝐫𝐞𝐬𝐬: 𝐓𝐚𝐧𝐠𝐚𝐢𝐥, 𝐃𝐡𝐚𝐤𝐚
-𝐂𝐮𝐫𝐫𝐞𝐧𝐭 𝐀𝐝𝐝𝐫𝐞𝐬𝐬 : 𝐌𝐨𝐲𝐦𝐨𝐧𝐬𝐢𝐧𝐡, 𝐃𝐡𝐚𝐤𝐚 𝐁𝐲𝐩𝐚𝐬𝐬
-𝐆𝐞𝐧𝐝𝐞𝐫       : 𝐌𝐚𝐥𝐞
-𝐀𝐠𝐞           : 𝟏𝟖+
-𝐑𝐞𝐥𝐚𝐭𝐢𝐨𝐧𝐬𝐡𝐢𝐩 : 𝐒𝐢𝐧𝐠𝐥𝐞
-𝐖𝐨𝐫𝐤         : 𝐒𝐭𝐮𝐝𝐞𝐧𝐭
-𝐆𝐦𝐚𝐢𝐥       : mohammadnayan447@gmail.com
-𝐖𝐡𝐚𝐭𝐬𝐀𝐩𝐩   : wa.me/+8801615298449
-𝐓𝐞𝐥𝐞𝐠𝐫𝐚𝐦     : t.me/MOHAMMADNAYAN
-𝐅𝐚𝐜𝐞𝐛𝐨𝐨𝐤 𝐋𝐢𝐧𝐤: https://www.facebook.com/www.xnxx.com169
+╔══════════════════════╗
+   👑 𝗣𝗥𝗘𝗠𝗜𝗨𝗠 𝗜𝗡𝗙𝗢 👑
+╚══════════════════════╝
 
---------------------------------------------
-\`\`\`
-🖥️ Server Info:
-• Platform       : ${os.platform()}
-• CPU            : ${os.cpus()[0].model}
-• Node.js Version: ${process.version}
-• Uptime         : ${uptime}
-• Total Memory   : ${(os.totalmem() / (1024 ** 3)).toFixed(2)} GB
-• Free Memory    : ${(os.freemem() / (1024 ** 3)).toFixed(2)} GB
-\`\`\``;
+🧑‍💻 𝐏𝐑𝐎𝐅𝐈𝐋𝐄
+━━━━━━━━━━━━━━━━━━━
+👤 𝐍𝐚𝐦𝐞        : ${global.config.botOwner || "Unknown"}
+📍 𝐋𝐨𝐜𝐚𝐭𝐢𝐨𝐧      : 𝐂𝐨𝐦𝐢𝐥𝐥𝐚, 𝐇𝐨𝐦𝐧𝐚 
+📚 𝐏𝐫𝐨𝐟𝐞𝐬𝐬𝐢𝐨𝐧     : 𝐁𝐮𝐬𝐢𝐧𝐞𝐬𝐬 🎐
+❤️ 𝐒𝐭𝐚𝐭𝐮𝐬        : 𝐒𝐢𝐧𝐠𝐥𝐞 😖
+
+📞 𝐂𝐎𝐍𝐓𝐀𝐂𝐓
+━━━━━━━━━━━━━━━━━━━
+📱 𝐖𝐡𝐚𝐭𝐬𝐀𝐩𝐩 : wa.me/${admins[0] || "8801838569277"}
+
+🤖 𝐁𝐎𝐓 𝐈𝐍𝐅𝐎
+━━━━━━━━━━━━━━━━━━━
+⚙️ 𝐍𝐚𝐦𝐞     : ${global.config.botName || "Bot"}
+📌 𝐏𝐫𝐞𝐟𝐢𝐱     : ${global.config.PREFIX || "/"}
+🚀 𝐕𝐞𝐫𝐬𝐢𝐨𝐧    : ${global.pkg?.version || "1.0.0"}
+
+👑 𝐁𝐎𝐓 𝐀𝐃𝐌𝐈𝐍𝐒
+━━━━━━━━━━━━━━━━━━━
+${adminText}
+━━━━━━━━━━━━━━━━━━━
+⚡ 𝐒𝐓𝐀𝐓𝐔𝐒 : 𝐎𝐍𝐋𝐈𝐍𝐄 🟢
+💎 𝐏𝐨𝐰𝐞𝐫𝐞𝐝 𝐛𝐲 𝐙𝐀𝐇𝐈𝐃-𝐁𝐎𝐓 🍷
+`;
+
+      // 📤 send
+      await api.sendMessage(
+        threadId,
+        {
+          image: {
+            url: "https://i.postimg.cc/vH38QPvm/20260408-091853.jpg"
+          },
+          caption: infoMessage,
+          mentions: mentions
+        },
+        { quoted: message }
+      );
+
+    } catch (error) {
+      console.error("INFO ERROR:", error);
 
       await api.sendMessage(
-            event.threadId,
-            { image: { url: "https://i.postimg.cc/2y9bTqv6/retouch-2025071913433217.jpg" }, caption: infoMessage || '' },
-            { quoted: event.message }
-          );;
-    } catch (error) {
-      console.error(error);
-      await api.sendMessage(event.threadId, '❌ An error occurred while fetching info.', { quoted: event.message });
+        event.threadId,
+        { text: "❌ 𝐈𝐧𝐟𝐨 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐞𝐫𝐫𝐨𝐫!" },
+        { quoted: event.message }
+      );
     }
   },
 };
