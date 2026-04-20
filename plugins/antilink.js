@@ -1,123 +1,96 @@
+const antiLink = {};
 
-const setAntilinkSetting = global.setAntilinkSetting;
-const getAntilinkSetting = global.getAntilinkSetting;
-
-  module.exports = {
-    config: {
-      name: 'antilink',
-      aliases: ['al'],
-      permission: 2,
-      prefix: true,
-      categorie: 'Moderation',
-      credit: 'Developed by Mohammad Nayan',
-      usages: [
-        'antilink off - Disable antilink protection.',
-        'antilink whatsapp - Block WhatsApp group links.',
-        'antilink whatsappchannel - Block WhatsApp channel links.',
-        'antilink telegram - Block Telegram links.',
-        'antilink all - Block all types of links.',
-      ],
-      description: 'Manage and enforce link-blocking policies in your group to prevent spam.',
-    },
+module.exports = {
+  config: {
+    name: "antilink",
+    aliases: ["linkkick"],
+    permission: 0,
+    prefix: true,
+    category: "group"
+  },
 
   start: async ({ event, api, args }) => {
-    const { threadId, isSenderAdmin} = event;
+    const { threadId, senderId } = event;
 
-    
-    if (!isSenderAdmin) {
-      await api.sendMessage(threadId, { text: 'Only admins can use the antilink command.' });
-      return;
+    const meta = await api.groupMetadata(threadId);
+    const admins = meta.participants.filter(p => p.admin).map(p => p.id);
+
+    if (!admins.includes(senderId)) {
+      return api.sendMessage(threadId, {
+        text: "🚫 Only group admin can use this!"
+      });
     }
 
-    const subCommand = args[0]?.toLowerCase();
+    const action = args[0];
 
-    if (!subCommand) {
-      const helpMessage = `
-*Antilink Commands:*
-1. *antilink off* - Disable antilink protection.
-2. *antilink whatsapp* - Block WhatsApp group links.
-3. *antilink whatsappchannel* - Block WhatsApp channel links.
-4. *antilink telegram* - Block Telegram links.
-5. *antilink all* - Block all types of links.
-      `;
-      await api.sendMessage(threadId, { text: helpMessage });
-      return;
+    if (action === "on") {
+      antiLink[threadId] = true;
+      return api.sendMessage(threadId, { text: "🔗 Anti-Link ON" });
     }
 
-    
-    switch (subCommand) {
-      case 'off':
-        setAntilinkSetting(threadId, 'off');
-        await api.sendMessage(threadId, { text: 'Antilink protection is now turned off.' });
-        break;
-      case 'whatsapp':
-        setAntilinkSetting(threadId, 'whatsappGroup');
-        await api.sendMessage(threadId, { text: 'WhatsApp group links are now blocked.' });
-        break;
-      case 'whatsappchannel':
-        setAntilinkSetting(threadId, 'whatsappChannel');
-        await api.sendMessage(threadId, { text: 'WhatsApp channel links are now blocked.' });
-        break;
-      case 'telegram':
-        setAntilinkSetting(threadId, 'telegram');
-        await api.sendMessage(threadId, { text: 'Telegram links are now blocked.' });
-        break;
-      case 'all':
-        setAntilinkSetting(threadId, 'allLinks');
-        await api.sendMessage(threadId, { text: 'All types of links are now blocked.' });
-        break;
-      default:
-        await api.sendMessage(threadId, { text: 'Invalid subcommand. Use .antilink for help.' });
+    if (action === "off") {
+      antiLink[threadId] = false;
+      return api.sendMessage(threadId, { text: "❌ Anti-Link OFF" });
     }
+
+    return api.sendMessage(threadId, {
+      text: "Use:\n.antilink on\n.antilink off"
+    });
   },
 
-  event: async ({ event, api, body }) => {
-    const { threadId, senderId, message } = event;
-    const antilinkSetting = getAntilinkSetting(threadId);
+  event: async ({ event, api }) => {
+    try {
+      const { threadId, senderId } = event;
 
-    if (antilinkSetting === 'off') return;
+      if (!threadId.endsWith("@g.us")) return;
+      if (!antiLink[threadId]) return;
 
-    
+      const msg = event.message?.message;
+      if (!msg) return;
 
-    const linkPatterns = {
-      whatsappGroup: /chat\.whatsapp\.com\/[A-Za-z0-9]{20,}/,
-      whatsappChannel: /wa\.me\/channel\/[A-Za-z0-9]{20,}/,
-      telegram: /t\.me\/[A-Za-z0-9_]+/,
-      allLinks: /https?:\/\/[^\s]+/,
-    };
+      // 📩 ALL POSSIBLE TEXT SOURCE (IMPORTANT FIX)
+      const text =
+        msg.conversation ||
+        msg.extendedTextMessage?.text ||
+        msg.imageMessage?.caption ||
+        msg.videoMessage?.caption ||
+        "";
 
-    let shouldDelete = false;
+      if (!text) return;
 
-    
-    if (
-      (antilinkSetting === 'whatsappGroup' && linkPatterns.whatsappGroup.test(body)) ||
-      (antilinkSetting === 'whatsappChannel' && linkPatterns.whatsappChannel.test(body)) ||
-      (antilinkSetting === 'telegram' && linkPatterns.telegram.test(body)) ||
-      (antilinkSetting === 'allLinks' && linkPatterns.allLinks.test(body))
-    ) {
-      shouldDelete = true;
-    }
+      // 🔗 LINK DETECT (STRONG)
+      const linkRegex = /(https?:\/\/\S+|www\.\S+|chat\.whatsapp\.com\/\S+)/i;
 
-    if (shouldDelete) {
+      if (!linkRegex.test(text)) return;
+
+      // 🛡️ ADMIN SKIP
+      const meta = await api.groupMetadata(threadId);
+      const admins = meta.participants.filter(p => p.admin).map(p => p.id);
+      if (admins.includes(senderId)) return;
+
+      // ❌ DELETE MESSAGE
       try {
-        const quotedMessageId = message.key.id;
-        const quotedParticipant = message.key.participant || senderId;
-
-        
         await api.sendMessage(threadId, {
-          delete: { remoteJid: threadId, fromMe: false, id: quotedMessageId, participant: quotedParticipant },
+          delete: {
+            remoteJid: threadId,
+            fromMe: false,
+            id: event.message.key.id,
+            participant: event.message.key.participant || senderId
+          }
         });
+      } catch {}
 
-        console.log(`Deleted message with ID ${quotedMessageId} from ${quotedParticipant}.`);
+      // 🚨 KICK USER
+      await api.groupParticipantsUpdate(threadId, [senderId], "remove");
 
-        
-        await api.sendMessage(threadId, {
-          text: `Warning! @${senderId.split('@')[0]}, posting links is not allowed.`,
-          mentions: [senderId],
-        });
-      } catch (error) {
-        console.error('Failed to delete message:', error);
-      }
+      // 📢 NOTIFY
+      await api.sendMessage(threadId, {
+        text: `🚨 @${senderId.split("@")[0]} link diyechilo → remove kora desi😆🤌🏻!`,
+        mentions: [senderId]
+      });
+
+    } catch (err) {
+      console.log("AntiLink Error:", err);
     }
-  },
+  }
 };
