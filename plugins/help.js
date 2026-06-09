@@ -159,27 +159,23 @@ module.exports = {
     // ───── MAIN HELP MENU ─────
 
     let responseText = `
-   ✧ 💖 *ʜᴇʟʟᴏ,* 💖 ✧
-╭─────────────────┈⊷
-
-│ ⎯͢✧ 𝐁𝐨𝐓: ${global.config.botName || "Shahin Rana"}
-
-┊ ⎯͢✧𝐎𝐰𝐧𝐞𝐑: ${global.config.botOwner || "Mr Rana"}
-
-┊ ⎯͢✧𝐆𝐥𝐨𝐛𝐚𝐋 𝐩𝐫𝐞𝐟𝐢𝐗: \`${globalPrefix}\`
-
-┊🪄⎯͢✧ 𝐆𝐫𝐨𝐮𝐩 𝐩𝐫𝐞𝐟𝐢𝐗: \`${prefix || "Not set (using global)"}\`
-
-┊ ⎯͢✧ 𝐕𝐞𝐫𝐬𝐢𝐨𝐧: ${pkg.version}
-
-┊ ⎯͢✧ 𝐓𝐢𝐌𝐄: ${currentTime}
-
-┊ ⎯͢✧ 𝐃𝐚𝐭𝐄: ${currentDate}
-
-┊ ⎯͢✧ 𝐓𝐢𝐦𝐄𝐙𝐨𝐧𝐞:* ${timezone}
-
-┊ ⎯͢✧ 𝐓𝐨𝐭𝐚𝐋 𝐜𝐨𝐦𝐦𝐚𝐧𝐝𝐬: ${commands.length}
-╰─────────────────┈⊷`;
+*🌍⃝⃘̉̉̉━⋆─⋆──❂*
+*┊ ┊ ┊ ┊ ┊*
+*┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
+*┊ ☠︎︎*
+*╭────《  *𝐗-𝐒ʜꫝʜɪɴ* 》────⊷*
+*│ ╭──────✧❁✧──────◆*
+*│ │ 🎭┊𝐁ᴏᴛ* : ${global.config.botName || "Shahin Rana"}
+*│ │ 🎭┊𝐎ᴡɴᴇʀ* : ${global.config.botOwner || "Mr Rana"}
+*│ │ 🎭┊𝐆ʟᴏʙᴀʟ 𝐏ʀᴇғɪ𝚇* : \`${globalPrefix}\`
+*│ │ 🎭┊𝐆ʀᴏᴜᴘ 𝐏ʀᴇғɪ𝚇* : \`${prefix || "Not set (using global)"}\`
+*│ │ 🎭┊𝐕ᴇʀꜱɪᴏɴ* : ${pkg.version}
+*│ │ 🎭┊𝐓ɪᴍᴇ* : ${currentTime}
+*│ │ 🎭┊𝐃ᴀᴛᴇ* : ${currentDate}
+*│ │ 🎭┊𝐓ɪᴍᴇᴢᴏɴᴇ* : ${timezone}
+*│ │ 🎭┊𝐓ᴏᴛᴀʟ 𝐂ᴏᴍᴍᴀɴᴅꜱ* : ${commands.length}
+*│ ╰──────✧❁✧──────◆*
+*╰══════════════════⊷*`;
 
 
 
@@ -261,4 +257,6 @@ responseText += `
 
   },
 
-};    
+};
+    
+
