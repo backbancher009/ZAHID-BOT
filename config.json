@@ -1,21 +1,21 @@
 {
   "packname": "My Sticker Pack",
   "author": "My Bot",
-  "botName": "*𝐗-𝐒ʜꫝʜɪɴ*🌷",
-  "botOwner": "*𝐒ʜᴀʜɪɴ 𝐑ᴀɴꫝ*",
+  "botName": "*𝐙.𝐓ᴀʟᴜᴋᴅᴀʀ.. ⚡*",
+  "botOwner": "*𝐙.𝐓ᴀʟᴜᴋᴅᴀʀ.. ⚡*",
   "autoUpdate": true,
   "runMsg": false,
-  "ownerNumber": "8801742564047",
-  "botNumber": "8801742564047",
+  "ownerNumber": "8801975660659",
+  "botNumber": "8801967880689",
   "botUid": "bot uid",
   "PREFIX": "/",
   "timeZone": "Asia/Dhaka",
   "admin": [
-    "8801347300095",
-    "your id"
+    "8801838569277",
+    "8801975660659"
   ],
-  "helpPic": "https://i.ibb.co.com/BHvWrzG2/1768616020605.png",
-  "welPic": "https://i.ibb.co.com/1GMcP6FS/file-000000000594720682bd0cdd008244c9.png",
+  "helpPic": "https://i.postimg.cc/vH38QPvm/20260408-091853.jpg",
+  "welPic": "https://i.postimg.cc/vH38QPvm/20260408-091853.jpg",
   "PORT": "3000",
   "delay": 100,
   "msg": {
