@@ -1,92 +1,261 @@
-const os = require('os');
+const axios = require("axios");
 
 module.exports = {
+
   config: {
-    name: 'info',
-    aliases: ['about', 'admininfo', 'serverinfo'],
+
+    name: 'help',
+
+    aliases: ['menu'],
+
     permission: 0,
+
     prefix: true,
-    category: 'Utilities', // ✅ fixed
-    credit: 'XAHID PRIME 🍷',
-    usages: [`${global.config.PREFIX}info`],
+
+    description: 'Show all available commands.',
+
+    category: 'Utility',
+
+    credit: 'Developed by Mohammad Nayan',
+
+    usages: ['help', 'help [command name]'],
+
   },
 
-  start: async ({ event, api }) => {
-    try {
-      const { threadId, message } = event;
+  start: async ({ event, api, args, loadcmd }) => {
 
-      // ⏱️ uptime
-      const uptime = new Date(process.uptime() * 1000)
-        .toISOString()
-        .substr(11, 8);
+    const { threadId, getPrefix } = event;
 
-      // 👑 admin list fix
-      const admins = global.config.admin || [];
+    const getAllCommands = () => loadcmd.map((plugin) => plugin.config);
 
-      let adminText = "❌ No admins found";
-      let mentions = [];
+    const commands = getAllCommands();
 
-      if (admins.length > 0) {
-        adminText = "";
-        admins.forEach((id, i) => {
-          const jid = id.includes("@") ? id : id + "@s.whatsapp.net";
-          mentions.push(jid);
-          adminText += `👑 ${i + 1}. @${jid.split("@")[0]}\n`;
-        });
+    const prefix = await getPrefix(threadId)
+
+    const globalPrefix = global.config.PREFIX;
+
+    const mergedCategories = {
+
+      "⚙️ System": ["Administration", "Admin", "Owner", "Bot Management", "System"],
+
+      "🧠 AI & Chat": ["AI", "AI Chat"],
+
+      "🎬 Media": ["Media", "Video", "Image"],
+
+      "🧰 Utilities": ["Utility", "Utilities", "System"],
+
+      "👥 Group": ["Group Management", "group"],
+
+      "🎮 Fun": ["Fun", "Games", "greetings"],
+
+      "🛰️ Tools": ["Tools", "Information"]
+
+    };
+
+    const categories = {};
+
+    commands.forEach((cmd) => {
+
+      let cat = cmd.category || cmd.categorie || cmd.categories || "📦 Uncategorized";
+
+      for (const merged in mergedCategories) {
+
+        if (mergedCategories[merged].includes(cat)) {
+
+          cat = merged;
+
+          break;
+
+        }
+
       }
 
-      // 💎 premium message
-      const infoMessage = `
-╔══════════════════════╗
-   👑 𝗣𝗥𝗘𝗠𝗜𝗨𝗠 𝗜𝗡𝗙𝗢 👑
-╚══════════════════════╝
+      if (!categories[cat]) categories[cat] = [];
 
-🧑‍💻 𝐏𝐑𝐎𝐅𝐈𝐋𝐄
-━━━━━━━━━━━━━━━━━━━
-👤 𝐍𝐚𝐦𝐞        : ${global.config.botOwner || "Unknown"}
-📍 𝐋𝐨𝐜𝐚𝐭𝐢𝐨𝐧      : 𝐂𝐨𝐦𝐢𝐥𝐥𝐚, 𝐇𝐨𝐦𝐧𝐚 
-📚 𝐏𝐫𝐨𝐟𝐞𝐬𝐬𝐢𝐨𝐧     : 𝐁𝐮𝐬𝐢𝐧𝐞𝐬𝐬 🎐
-❤️ 𝐒𝐭𝐚𝐭𝐮𝐬        : 𝐒𝐢𝐧𝐠𝐥𝐞 😖
+      categories[cat].push(cmd);
 
-📞 𝐂𝐎𝐍𝐓𝐀𝐂𝐓
-━━━━━━━━━━━━━━━━━━━
-📱 𝐖𝐡𝐚𝐭𝐬𝐀𝐩𝐩 : wa.me/${admins[0] || "8801838569277"}
+    });
 
-🤖 𝐁𝐎𝐓 𝐈𝐍𝐅𝐎
-━━━━━━━━━━━━━━━━━━━
-⚙️ 𝐍𝐚𝐦𝐞     : ${global.config.botName || "Bot"}
-📌 𝐏𝐫𝐞𝐟𝐢𝐱     : ${global.config.PREFIX || "/"}
-🚀 𝐕𝐞𝐫𝐬𝐢𝐨𝐧    : ${global.pkg?.version || "1.0.0"}
+    // ───── SINGLE COMMAND INFO ─────
 
-👑 𝐁𝐎𝐓 𝐀𝐃𝐌𝐈𝐍𝐒
-━━━━━━━━━━━━━━━━━━━
-${adminText}
-━━━━━━━━━━━━━━━━━━━
-⚡ 𝐒𝐓𝐀𝐓𝐔𝐒 : 𝐎𝐍𝐋𝐈𝐍𝐄 🟢
-💎 𝐏𝐨𝐰𝐞𝐫𝐞𝐝 𝐛𝐲 𝐙𝐀𝐇𝐈𝐃-𝐁𝐎𝐓 🍷
-`;
+    if (args[0]) {
 
-      // 📤 send
-      await api.sendMessage(
-        threadId,
-        {
-          image: {
-            url: "https://i.postimg.cc/vH38QPvm/20260408-091853.jpg"
-          },
-          caption: infoMessage,
-          mentions: mentions
-        },
-        { quoted: message }
-      );
+      const command = commands.find((cmd) => cmd.name.toLowerCase() === args[0].toLowerCase());
 
-    } catch (error) {
-      console.error("INFO ERROR:", error);
+      if (command) {
 
-      await api.sendMessage(
-        event.threadId,
-        { text: "❌ 𝐈𝐧𝐟𝐨 𝐜𝐨𝐦𝐦𝐚𝐧𝐝 𝐞𝐫𝐫𝐨𝐫!" },
-        { quoted: event.message }
-      );
+        const infoText = `
+
+╭─❖  𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗜𝗡𝗙𝗢  ❖─╮
+
+│ 🔹 Name: ${command.name}
+
+│ 🔹 Aliases: ${command.aliases?.join(", ") || "None"}
+
+│ 🔹 Version: ${command.version || "1.0.0"}
+
+│ 🔹 Description: ${command.description || "No description"}
+
+│ 🔹 Usage: ${command.usage || command.usages?.join("\n│   ") || "Not defined"}
+
+│ 🔹 Permission: ${command.permission}
+
+│ 🔹 Category: ${command.category || "Uncategorized"}
+
+│ 🔹 Credits: ${command.credit || command.credits || "Mohammad Nayan"}
+
+╰────────────────────╯`;
+
+        await api.sendMessage(threadId, { text: infoText });
+
+      } else {
+
+        await api.sendMessage(threadId, { text: `⚠️ No command found named "${args[0]}".` });
+
+      }
+
+      return;
+
     }
+
+    const pkg = global.pkg;
+
+    const timezone = global.config.timeZone || "Asia/Dhaka";
+
+    const now = new Date().toLocaleString("en-US", {
+
+      timeZone: timezone,
+
+      hour12: true,
+
+    });
+
+    const currentTime = new Date().toLocaleTimeString("en-US", {
+
+      timeZone: timezone,
+
+      hour: "2-digit",
+
+      minute: "2-digit",
+
+      second: "2-digit",
+
+      hour12: true
+
+    });
+
+    const currentDate = new Date().toLocaleDateString("en-US", {
+
+      timeZone: timezone,
+
+      day: "2-digit",
+
+      month: "2-digit",
+
+      year: "numeric"
+
+    });
+
+    // ───── MAIN HELP MENU ─────
+
+    let responseText = `
+*🌍⃝⃘̉̉̉━⋆─⋆──❂*
+*┊ ┊ ┊ ┊ ┊*
+*┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
+*┊ ☠︎︎*
+*╭────《  *𝐗-𝐒ʜꫝʜɪɴ* 》────⊷*
+*│ ╭──────✧❁✧──────◆*
+*│ │ 🎭┊𝐁ᴏᴛ* : ${global.config.botName || "*𝐙.𝐓ᴀʟᴜᴋᴅᴀʀ.. ⚡*"}
+*│ │ 🎭┊𝐎ᴡɴᴇʀ* : ${global.config.botOwner || "*𝐙.𝐓ᴀʟᴜᴋᴅᴀʀ.. ⚡*"}
+*│ │ 🎭┊𝐆ʟᴏʙᴀʟ 𝐏ʀᴇғɪ𝚇* : \`${globalPrefix}\`
+*│ │ 🎭┊𝐆ʀᴏᴜᴘ 𝐏ʀᴇғɪ𝚇* : \`${prefix || "Not set (using global)"}\`
+*│ │ 🎭┊𝐕ᴇʀꜱɪᴏɴ* : ${pkg.version}
+*│ │ 🎭┊𝐓ɪᴍᴇ* : ${currentTime}
+*│ │ 🎭┊𝐃ᴀᴛᴇ* : ${currentDate}
+*│ │ 🎭┊𝐓ɪᴍᴇᴢᴏɴᴇ* : ${timezone}
+*│ │ 🎭┊𝐓ᴏᴛᴀʟ 𝐂ᴏᴍᴍᴀɴᴅꜱ* : ${commands.length}
+*│ ╰──────✧❁✧──────◆*
+*╰══════════════════⊷*`;
+
+
+
+
+// Fancy Font Function
+
+function fancyText(text) {
+
+  const map = {
+
+    a:"𝐚",b:"𝐛",c:"𝐜",d:"𝐝",e:"𝐞",f:"𝐟",g:"𝐠",
+
+    h:"𝐡",i:"𝐢",j:"𝐣",k:"𝐤",l:"𝐥",m:"𝐦",n:"𝐧",
+
+    o:"𝐨",p:"𝐩",q:"𝐪",r:"𝐫",s:"𝐬",t:"𝐭",u:"𝐮",
+
+    v:"𝐯",w:"𝐰",x:"𝐱",y:"𝐲",z:"𝐳",
+
+    A:"𝐀",B:"𝐁",C:"𝐂",D:"𝐃",E:"𝐄",F:"𝐅",G:"𝐆",
+
+    H:"𝐇",I:"𝐈",J:"𝐉",K:"𝐊",L:"𝐋",M:"𝐌",N:"𝐍",
+
+    O:"𝐎",P:"𝐏",Q:"𝐐",R:"𝐑",S:"𝐒",T:"𝐓",U:"𝐔",
+
+    V:"𝐕",W:"𝐖",X:"𝐗",Y:"𝐘",Z:"𝐙"
+
+  };
+
+  return text.split("").map(x => map[x] || x).join("");
+
+}
+
+for (const category in categories) {
+
+    const cmds = categories[category]
+
+        .map(cmd => `┃ *▢ ${prefix}${fancyText(cmd.name)}*`)
+
+        .join("\n");
+
+    responseText += `
+
+*❲ ❲ ${category} ❳ ❳ ⬩*
+
+╭⊷
+
+${cmds}
+
+╰⊷`;
+
+}
+
+responseText += `
+
+*𝐙.𝐓ᴀʟᴜᴋᴅᴀʀ.. ⚡*`;
+    
+
+
+
+
+
+    try {
+
+      const response = await axios.get(global.config.helpPic, { responseType: 'stream' });
+
+      await api.sendMessage(threadId, {
+
+        image: { stream: response.data },
+
+        caption: responseText
+
+      });
+
+    } catch {
+
+      await api.sendMessage(threadId, { text: responseText });
+
+    }
+
   },
+
 };
+
