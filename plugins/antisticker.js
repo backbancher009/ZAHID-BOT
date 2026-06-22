@@ -4,7 +4,7 @@ module.exports = {
   config: {
     name: "antisticker",
     aliases: ["stickerblock"],
-    permission: 0,
+    permission: 3,
     prefix: true,
     category: "group"
   },
