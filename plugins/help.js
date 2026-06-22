@@ -1,88 +1,261 @@
 const axios = require("axios");
 
 module.exports = {
+
   config: {
-    name: "menu",
-    aliases: ["help"],
+
+    name: 'help',
+
+    aliases: ['menu'],
+
     permission: 0,
+
     prefix: true,
-    description: "Premium Command Menu",
-    category: "Utility",
-    credit: "XAHID PRIME 🍷"
+
+    description: 'Show all available commands.',
+
+    category: 'Utility',
+
+    credit: 'Developed by Mohammad Nayan',
+
+    usages: ['help', 'help [command name]'],
+
   },
 
-  start: async ({ event, api, loadcmd }) => {
-    const { threadId } = event;
+  start: async ({ event, api, args, loadcmd }) => {
 
-    const commands = loadcmd.map(cmd => cmd.config);
+    const { threadId, getPrefix } = event;
 
-    // 🧠 Group commands by category
+    const getAllCommands = () => loadcmd.map((plugin) => plugin.config);
+
+    const commands = getAllCommands();
+
+    const prefix = await getPrefix(threadId)
+
+    const globalPrefix = global.config.PREFIX;
+
+    const mergedCategories = {
+
+      "⚙️ System": ["Administration", "Admin", "Owner", "Bot Management", "System"],
+
+      "🧠 AI & Chat": ["AI", "AI Chat"],
+
+      "🎬 Media": ["Media", "Video", "Image"],
+
+      "🧰 Utilities": ["Utility", "Utilities", "System"],
+
+      "👥 Group": ["Group Management", "group"],
+
+      "🎮 Fun": ["Fun", "Games", "greetings"],
+
+      "🛰️ Tools": ["Tools", "Information"]
+
+    };
+
     const categories = {};
-    commands.forEach(cmd => {
-      const cat = cmd.category || cmd.categorie || cmd.categories || "Other";
+
+    commands.forEach((cmd) => {
+
+      let cat = cmd.category || cmd.categorie || cmd.categories || "📦 Uncategorized";
+
+      for (const merged in mergedCategories) {
+
+        if (mergedCategories[merged].includes(cat)) {
+
+          cat = merged;
+
+          break;
+
+        }
+
+      }
+
       if (!categories[cat]) categories[cat] = [];
-      categories[cat].push(cmd.name);
+
+      categories[cat].push(cmd);
+
     });
 
-    // 🕒 Time & Date
-    const now = new Date();
-    const time = now.toLocaleTimeString("en-US", { hour12: true });
-    const date = now.toLocaleDateString("en-US");
+    // ───── SINGLE COMMAND INFO ─────
 
-    // 📊 Total commands
-    const total = commands.length;
+    if (args[0]) {
 
-    // 💎 Header
-    let text = `
-╔══════════════════════╗
-   🚀 ${global.config.botName || "𝐙𝐀𝐇𝐈𝐃-𝐁𝐎𝐓 𝐒𝐘𝐒𝐓𝐄𝐌"} 🚀
-╚══════════════════════╝
+      const command = commands.find((cmd) => cmd.name.toLowerCase() === args[0].toLowerCase());
 
-👑 𝐎𝐰𝐧𝐞𝐫   : ${global.config.botOwner || "𝐙𝐀𝐇𝐈𝐃-𝐁𝐎𝐓"}
-🤖 𝐁𝐨𝐭     : ${global.config.botName || "𝐙𝐀𝐇𝐈𝐃-𝐁𝐎𝐓"}
-🌐 𝐏𝐫𝐞𝐟𝐢𝐱  : ${global.config.PREFIX}
-⚡ 𝐕𝐞𝐫𝐬𝐢𝐨𝐧 : ${global.pkg?.version || "1.0.0"}
+      if (command) {
 
-⏰ 𝐓𝐢𝐦𝐞    : ${time}
-📅 𝐃𝐚𝐭𝐞    : ${date}
+        const infoText = `
 
-━━━━━━━━━━━━━━━━━━━━━━━
-📦 𝐓𝐎𝐓𝐀𝐋 𝐂𝐎𝐌𝐌𝐀𝐍𝐃𝐒 ➜ ${total}
-━━━━━━━━━━━━━━━━━━━━━━━
-`;
+╭─❖  𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗜𝗡𝗙𝗢  ❖─╮
 
-    // 📂 Categories loop
-    for (const cat in categories) {
-      text += `\n╭─〔 ${cat} 〕\n`;
+│ 🔹 Name: ${command.name}
 
-      categories[cat].forEach(cmd => {
-        text += `│ ✧ ${global.config.PREFIX}${cmd}\n`;
-      });
+│ 🔹 Aliases: ${command.aliases?.join(", ") || "None"}
 
-      text += `╰───────────────╯\n`;
+│ 🔹 Version: ${command.version || "1.0.0"}
+
+│ 🔹 Description: ${command.description || "No description"}
+
+│ 🔹 Usage: ${command.usage || command.usages?.join("\n│   ") || "Not defined"}
+
+│ 🔹 Permission: ${command.permission}
+
+│ 🔹 Category: ${command.category || "Uncategorized"}
+
+│ 🔹 Credits: ${command.credit || command.credits || "Mohammad Nayan"}
+
+╰────────────────────╯`;
+
+        await api.sendMessage(threadId, { text: infoText });
+
+      } else {
+
+        await api.sendMessage(threadId, { text: `⚠️ No command found named "${args[0]}".` });
+
+      }
+
+      return;
+
     }
 
-    // 🔻 Footer
-    text += `
-━━━━━━━━━━━━━━━━━━━━━━━
-⚡ 𝐒𝐘𝐒𝐓𝐄𝐌 𝐒𝐓𝐀𝐓𝐔𝐒: 𝐎𝐍𝐋𝐈𝐍𝐄
-💀 𝐏𝐎𝐖𝐄𝐑𝐄𝐃 𝐁𝐘 ${global.config.botName || "𝐙𝐀𝐇𝐈𝐃-𝐁𝐎𝐓"} 🍷
-━━━━━━━━━━━━━━━━━━━━━━━
-`;
+    const pkg = global.pkg;
 
-    // 📤 Send
+    const timezone = global.config.timeZone || "Asia/Dhaka";
+
+    const now = new Date().toLocaleString("en-US", {
+
+      timeZone: timezone,
+
+      hour12: true,
+
+    });
+
+    const currentTime = new Date().toLocaleTimeString("en-US", {
+
+      timeZone: timezone,
+
+      hour: "2-digit",
+
+      minute: "2-digit",
+
+      second: "2-digit",
+
+      hour12: true
+
+    });
+
+    const currentDate = new Date().toLocaleDateString("en-US", {
+
+      timeZone: timezone,
+
+      day: "2-digit",
+
+      month: "2-digit",
+
+      year: "numeric"
+
+    });
+
+    // ───── MAIN HELP MENU ─────
+
+    let responseText = `
+*🌍⃝⃘̉̉̉━⋆─⋆──❂*
+*┊ ┊ ┊ ┊ ┊*
+*┊ ┊ ✫ ˚㋛ ⋆｡ ❀*
+*┊ ☠︎︎*
+*╭────《  *𝐙.𝐓ᴀʟᴜᴋᴅᴀʀ.. ⚡* 》────⊷*
+*│ ╭──────✧❁✧──────◆*
+*│ │ 🎭┊𝐁ᴏᴛ* : ${global.config.botName || "*𝐙.𝐓ᴀʟᴜᴋᴅᴀʀ.. ⚡*"}
+*│ │ 🎭┊𝐎ᴡɴᴇʀ* : ${global.config.botOwner || "*𝐙.𝐓ᴀʟᴜᴋᴅᴀʀ.. ⚡*"}
+*│ │ 🎭┊𝐆ʟᴏʙᴀʟ 𝐏ʀᴇғɪ𝚇* : \`${globalPrefix}\`
+*│ │ 🎭┊𝐆ʀᴏᴜᴘ 𝐏ʀᴇғɪ𝚇* : \`${prefix || "Not set (using global)"}\`
+*│ │ 🎭┊𝐕ᴇʀꜱɪᴏɴ* : ${pkg.version}
+*│ │ 🎭┊𝐓ɪᴍᴇ* : ${currentTime}
+*│ │ 🎭┊𝐃ᴀᴛᴇ* : ${currentDate}
+*│ │ 🎭┊𝐓ɪᴍᴇᴢᴏɴᴇ* : ${timezone}
+*│ │ 🎭┊𝐓ᴏᴛᴀʟ 𝐂ᴏᴍᴍᴀɴᴅꜱ* : ${commands.length}
+*│ ╰──────✧❁✧──────◆*
+*╰══════════════════⊷*`;
+
+
+
+
+// Fancy Font Function
+
+function fancyText(text) {
+
+  const map = {
+
+    a:"𝐚",b:"𝐛",c:"𝐜",d:"𝐝",e:"𝐞",f:"𝐟",g:"𝐠",
+
+    h:"𝐡",i:"𝐢",j:"𝐣",k:"𝐤",l:"𝐥",m:"𝐦",n:"𝐧",
+
+    o:"𝐨",p:"𝐩",q:"𝐪",r:"𝐫",s:"𝐬",t:"𝐭",u:"𝐮",
+
+    v:"𝐯",w:"𝐰",x:"𝐱",y:"𝐲",z:"𝐳",
+
+    A:"𝐀",B:"𝐁",C:"𝐂",D:"𝐃",E:"𝐄",F:"𝐅",G:"𝐆",
+
+    H:"𝐇",I:"𝐈",J:"𝐉",K:"𝐊",L:"𝐋",M:"𝐌",N:"𝐍",
+
+    O:"𝐎",P:"𝐏",Q:"𝐐",R:"𝐑",S:"𝐒",T:"𝐓",U:"𝐔",
+
+    V:"𝐕",W:"𝐖",X:"𝐗",Y:"𝐘",Z:"𝐙"
+
+  };
+
+  return text.split("").map(x => map[x] || x).join("");
+
+}
+
+for (const category in categories) {
+
+    const cmds = categories[category]
+
+        .map(cmd => `┃ *▢ ${prefix}${fancyText(cmd.name)}*`)
+
+        .join("\n");
+
+    responseText += `
+
+*❲ ❲ ${category} ❳ ❳ ⬩*
+
+╭⊷
+
+${cmds}
+
+╰⊷`;
+
+}
+
+responseText += `
+
+*𝐙.𝐓ᴀʟᴜᴋᴅᴀʀ.. ⚡*`;
+    
+
+
+
+
+
     try {
-      const res = await axios.get(global.config.helpPic, {
-        responseType: "stream"
-      });
+
+      const response = await axios.get(global.config.helpPic, { responseType: 'stream' });
 
       await api.sendMessage(threadId, {
-        image: { stream: res.data },
-        caption: text
+
+        image: { stream: response.data },
+
+        caption: responseText
+
       });
 
     } catch {
-      await api.sendMessage(threadId, { text });
+
+      await api.sendMessage(threadId, { text: responseText });
+
     }
-  }
+
+  },
+
 };
+        
