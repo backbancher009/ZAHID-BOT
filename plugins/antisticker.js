@@ -1,78 +1,102 @@
 const stickerStatus = {};
 
 module.exports = {
-  config: {
-    name: "antisticker",
-    aliases: ["stickerblock"],
-    permission: 3,
-    prefix: true,
-    category: "group"
-  },
+config: {
+name: "antisticker",
+aliases: ["stickerblock", "nosticker"],
+permission: 3,
+prefix: true,
+category: "group",
+credit: "Developed by Mohammad Nayan"
+},
 
-  start: async ({ event, api, args }) => {
-    const { threadId, senderId } = event;
+start: async ({ event, api, args }) => {
+try {
+const { threadId, senderId } = event;
 
-    const meta = await api.groupMetadata(threadId);
-    const admins = meta.participants.filter(p => p.admin).map(p => p.id);
+  if (!threadId.endsWith("@g.us")) {
+    return api.sendMessage(threadId, {
+      text: "*❌ This command can only be used in groups.*"
+    });
+  }
 
-    if (!admins.includes(senderId)) {
-      return api.sendMessage(threadId, {
-        text: "🚫 Only admin can use this!"
-      });
-    }
+  const metadata = await api.groupMetadata(threadId);
+  const admins = metadata.participants
+    .filter(p => p.admin)
+    .map(p => p.id);
 
-    const action = args[0];
+  if (!admins.includes(senderId)) {
+    return api.sendMessage(threadId, {
+      text: "*🚫 Only group admins can use this command.*"
+    });
+  }
 
-    if (action === "on") {
-      stickerStatus[threadId] = true;
-      return api.sendMessage(threadId, { text: "✅ 𝗦𝘁𝗶𝗰𝗸𝗲𝗿 𝗯𝗹𝗼𝗰𝗸 𝗢𝗡" });
-    }
+  const action = args[0]?.toLowerCase();
 
-    if (action === "off") {
-      stickerStatus[threadId] = false;
-      return api.sendMessage(threadId, { text: "🚫 𝗦𝘁𝗶𝗰𝗸𝗲𝗿 𝗯𝗹𝗼𝗰𝗸 𝗢𝗙𝗙" });
-    }
+  if (action === "on") {
+    stickerStatus[threadId] = true;
 
     return api.sendMessage(threadId, {
-      text: "Use:\n.nosticker on\n.nosticker off"
+      text: "*✅ Sticker protection enabled.*"
     });
-  },
-
-  event: async ({ event, api }) => {
-    const { threadId, senderId, message } = event;
-
-    if (!threadId.endsWith("@g.us")) return;
-    if (!stickerStatus[threadId]) return;
-
-    const msg = message?.message;
-    if (!msg?.stickerMessage) return;
-
-    // 🛡️ admin skip
-    const meta = await api.groupMetadata(threadId);
-    const admins = meta.participants.filter(p => p.admin).map(p => p.id);
-    if (admins.includes(senderId)) return;
-
-    try {
-      // ❌ delete sticker
-      await api.sendMessage(threadId, {
-        delete: {
-          remoteJid: threadId,
-          fromMe: false,
-          id: message.key.id,
-          participant: message.key.participant || senderId
-        }
-      });
-
-      // ⏳ small delay (important fix)
-      setTimeout(async () => {
-        await api.sendMessage(threadId, {
-          text: `🤕❕ @${senderId.split("@")[0]} 𝗦𝘁𝗶𝗰𝗸𝗲𝗿 𝗻𝗼𝘁 𝗮𝗹𝗹𝗼𝘄:)`,
-          mentions: [senderId]
-        });
-      }, 500);
-
-    } catch (e) {
-      console.log("Sticker error:", e);
-    }
   }
+
+  if (action === "off") {
+    delete stickerStatus[threadId];
+
+    return api.sendMessage(threadId, {
+      text: "❌ Sticker protection disabled."
+    });
+  }
+
+  return api.sendMessage(threadId, {
+    text: `Usage:\n${global.config.PREFIX}antisticker on\n${global.config.PREFIX}antisticker off`
+  });
+
+} catch (err) {
+  console.log("AntiSticker Command Error:", err);
+}
+
+},
+
+event: async ({ event, api }) => {
+try {
+const { threadId, senderId, message } = event;
+
+  if (!threadId?.endsWith("@g.us")) return;
+  if (!stickerStatus[threadId]) return;
+
+  const msg = message?.message;
+  if (!msg?.stickerMessage) return;
+
+  const metadata = await api.groupMetadata(threadId);
+
+  const admins = metadata.participants
+    .filter(p => p.admin)
+    .map(p => p.id);
+
+  // Admin bypass
+  if (admins.includes(senderId)) return;
+
+  await api.sendMessage(threadId, {
+    delete: {
+      remoteJid: threadId,
+      fromMe: false,
+      id: message.key.id,
+      participant: message.key.participant || senderId
+    }
+  });
+
+  setTimeout(() => {
+    api.sendMessage(threadId, {
+      text: `🤕❕@${senderId.split("@")[0]} 𝗦𝘁𝗶𝗰𝗸𝗲𝗿 𝗻𝗼𝘁 𝗮𝗹𝗹𝗼𝘄 :)`,
+      mentions: [senderId]
+    }).catch(console.error);
+  }, 500);
+
+} catch (err) {
+  console.log("AntiSticker Event Error:", err);
+}
+
+}
 };
